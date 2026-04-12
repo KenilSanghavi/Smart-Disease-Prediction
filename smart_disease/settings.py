@@ -17,8 +17,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'web-production-78f04.up.railway.app',
-    '*']  # Change to your domain in production
-
+    '*'
+]
+CSRF_TRUSTED_ORIGINS = [
+    'https://web-production-78f04.up.railway.app',
+]
 # ── INSTALLED APPS ──────────────────────────────────────────
 INSTALLED_APPS = [
     'django.contrib.admin',
