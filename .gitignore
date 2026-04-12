@@ -8,7 +8,6 @@ media/
 *.log
 
 # Large ML files
-*.pkl
 *.csv
 chatbot/chroma_db/
 chatbot/docs/
