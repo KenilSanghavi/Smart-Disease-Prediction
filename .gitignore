@@ -6,3 +6,9 @@ db.sqlite3
 staticfiles/
 media/
 *.log
+
+# Large ML files - too big for GitHub
+prediction/ml_models/disease_model.pkl
+prediction/ml_models/medicine_dataset.csv
+chatbot/chroma_db/
+chatbot/docs/

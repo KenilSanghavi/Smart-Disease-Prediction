@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # MediSense AI — Smart Disease Prediction System v2
 
 ## What's New in v2
@@ -137,3 +138,6 @@ python manage.py runserver
 | diagnosis_reports | prediction |
 | prescriptions | prediction |
 | chatbot_history ⭐ NEW | chatbot |
+=======
+# Smart-Disease-Prediction
+>>>>>>> cfee6c7ce9a0511811e95406e5bfc98f5ce95c2f
