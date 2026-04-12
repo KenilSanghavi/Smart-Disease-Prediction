@@ -15,7 +15,9 @@ SECRET_KEY = 'django-insecure-smart-disease-v2-change-in-production-xyz123'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']  # Change to your domain in production
+ALLOWED_HOSTS = [
+    'web-production-78f04.up.railway.app',
+    '*']  # Change to your domain in production
 
 # ── INSTALLED APPS ──────────────────────────────────────────
 INSTALLED_APPS = [
