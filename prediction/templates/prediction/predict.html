@@ -1,0 +1,178 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Disease Prediction | MediSense AI{% endblock %}
+{% block nav_predict %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>🔬 Disease Prediction & Analysis</h2>
+    <p>Select your symptoms and enter vitals to get AI-based prediction</p>
+</div>
+
+<form method="POST" action="{% url 'predict' %}" id="predictForm">
+    {% csrf_token %}
+
+    <!-- ── Symptoms Section ── -->
+    <div class="card">
+        <div class="flex-between" style="margin-bottom:20px;">
+            <h3 class="card-title" style="margin-bottom:0;">✅ Select Your Symptoms</h3>
+            <span id="selectedCount" style="background:var(--gradient-btn);color:white;padding:5px 16px;border-radius:20px;font-size:13px;font-weight:700;">
+                0 selected
+            </span>
+        </div>
+
+        <!-- Respiratory -->
+        {% if symptoms_by_category.Respiratory %}
+        <div class="symptom-section">
+            <h4>🫁 Respiratory</h4>
+            <div class="symptom-grid">
+                {% for symptom in symptoms_by_category.Respiratory %}
+                <label class="symptom-item" onclick="toggleSymptom(this)">
+                    <input type="checkbox" name="symptoms" value="{{ symptom.symptom_name }}">
+                    <span class="checkmark">✓</span>
+                    <span>{{ symptom.display_name|default:symptom.symptom_name }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Pain -->
+        {% if symptoms_by_category.Pain %}
+        <div class="symptom-section">
+            <h4>🤕 Pain</h4>
+            <div class="symptom-grid">
+                {% for symptom in symptoms_by_category.Pain %}
+                <label class="symptom-item" onclick="toggleSymptom(this)">
+                    <input type="checkbox" name="symptoms" value="{{ symptom.symptom_name }}">
+                    <span class="checkmark">✓</span>
+                    <span>{{ symptom.display_name|default:symptom.symptom_name }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Gastro -->
+        {% if symptoms_by_category.Gastro %}
+        <div class="symptom-section">
+            <h4>🤢 Gastrointestinal</h4>
+            <div class="symptom-grid">
+                {% for symptom in symptoms_by_category.Gastro %}
+                <label class="symptom-item" onclick="toggleSymptom(this)">
+                    <input type="checkbox" name="symptoms" value="{{ symptom.symptom_name }}">
+                    <span class="checkmark">✓</span>
+                    <span>{{ symptom.display_name|default:symptom.symptom_name }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- General -->
+        {% if symptoms_by_category.General %}
+        <div class="symptom-section">
+            <h4>🌡️ General</h4>
+            <div class="symptom-grid">
+                {% for symptom in symptoms_by_category.General %}
+                <label class="symptom-item" onclick="toggleSymptom(this)">
+                    <input type="checkbox" name="symptoms" value="{{ symptom.symptom_name }}">
+                    <span class="checkmark">✓</span>
+                    <span>{{ symptom.display_name|default:symptom.symptom_name }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not symptoms_by_category.Respiratory and not symptoms_by_category.Pain %}
+        <div class="alert alert-warning">
+            ⚠️ No symptoms found in database. Please run: <code>python manage.py load_data</code>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ── Vitals Section ── -->
+    <div class="card">
+        <h3 class="card-title">🩺 Enter Your Vitals</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;">
+            <div class="form-group">
+                <label>BMI</label>
+                <input type="number" name="bmi" class="form-input" step="0.1" min="10" max="60" value="22.0" placeholder="e.g. 22.5" required>
+            </div>
+            <div class="form-group">
+                <label>Body Temperature (°C)</label>
+                <input type="number" name="body_temperature" class="form-input" step="0.1" min="35" max="42" value="37.0" placeholder="e.g. 37.5" required>
+            </div>
+            <div class="form-group">
+                <label>Heart Rate (bpm)</label>
+                <input type="number" name="heart_rate" class="form-input" min="40" max="200" value="80" placeholder="e.g. 80" required>
+            </div>
+            <div class="form-group">
+                <label>Symptom Duration (days)</label>
+                <input type="number" name="symptom_duration_days" class="form-input" min="1" max="90" value="1" required>
+            </div>
+            <div class="form-group">
+                <label>Pain Severity (1-10)</label>
+                <input type="number" name="pain_severity" class="form-input" min="1" max="10" value="3" required>
+            </div>
+        </div>
+
+        <h4 style="font-size:15px;font-weight:700;color:var(--primary);margin:20px 0 12px;">📋 Medical History</h4>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;">
+                <input type="checkbox" name="chronic_disease" value="1" style="width:18px;height:18px;accent-color:var(--primary);">
+                Chronic Disease
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;">
+                <input type="checkbox" name="allergy_history" value="1" style="width:18px;height:18px;accent-color:var(--primary);">
+                Allergy History
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;">
+                <input type="checkbox" name="recent_travel" value="1" style="width:18px;height:18px;accent-color:var(--primary);">
+                Recent Travel
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;">
+                <input type="checkbox" name="smoking" value="1" style="width:18px;height:18px;accent-color:var(--primary);">
+                Smoking
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;">
+                <input type="checkbox" name="alcohol" value="1" style="width:18px;height:18px;accent-color:var(--primary);">
+                Alcohol
+            </label>
+        </div>
+    </div>
+
+    <!-- ── Submit ── -->
+    <div class="text-center">
+        <button type="submit" class="btn-primary" style="max-width:400px;" onclick="return validateForm()">
+            🔬 Predict Disease
+        </button>
+        <p style="font-size:13px;color:#64748b;margin-top:10px;">
+            Results are AI-generated. Always consult a doctor for medical advice.
+        </p>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* Toggle symptom checkbox selection */
+    function toggleSymptom(label) {
+        const cb = label.querySelector('input[type="checkbox"]');
+        cb.checked = !cb.checked;
+        label.classList.toggle('selected', cb.checked);
+        const count = document.querySelectorAll('input[name="symptoms"]:checked').length;
+        document.getElementById('selectedCount').textContent = count + ' selected';
+    }
+
+    /* Validate at least 1 symptom selected before submit */
+    function validateForm() {
+        const checked = document.querySelectorAll('input[name="symptoms"]:checked').length;
+        if (checked === 0) {
+            alert('Please select at least one symptom!');
+            return false;
+        }
+        return true;
+    }
+</script>
+{% endblock %}

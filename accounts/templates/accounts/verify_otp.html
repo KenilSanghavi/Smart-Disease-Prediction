@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>{% block title %}MediSense AI{% endblock %}</title><link rel="stylesheet" href="{% static 'accounts/css/style.css' %}">
+<link rel="icon" type="image/svg+xml" href="{% static 'accounts/favicon.svg' %}">
+</head>
+<body class="auth-body">
+<div class="auth-card">
+    <div style="text-align:center;font-size:48px;margin-bottom:10px;">📧</div>
+    <h2>Enter OTP</h2>
+    <p class="subtitle">We sent a 6-digit OTP to <strong>{{ email }}</strong></p>
+    {% if messages %}<div class="messages-box">{% for m in messages %}<div class="alert alert-{{ m.tags }}">{{ m }}</div>{% endfor %}</div>{% endif %}
+    <form method="POST">{% csrf_token %}
+        <div class="form-group">{{ form.otp }}{% if form.otp.errors %}<small style="color:#ef4444;">{{ form.otp.errors|join:", " }}</small>{% endif %}</div>
+        <p style="text-align:center;font-size:13px;color:#64748b;margin-bottom:16px;">OTP expires in: <strong id="timer" style="color:#ef4444;">05:00</strong></p>
+        <button type="submit" class="btn-primary">Verify OTP</button>
+    </form>
+    <div class="auth-link" style="margin-top:14px;">Didn't receive? <a href="{% url 'resend_otp' %}"><strong>Resend OTP</strong></a></div>
+</div>
+<script>
+let s = 300;
+const t = document.getElementById('timer');
+const iv = setInterval(() => {
+    s--;
+    const m = String(Math.floor(s/60)).padStart(2,'0');
+    const sec = String(s%60).padStart(2,'0');
+    t.textContent = m+':'+sec;
+    if(s<=0){clearInterval(iv);t.textContent='Expired';}
+},1000);
+</script>
+</body></html>

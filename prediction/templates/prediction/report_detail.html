@@ -1,0 +1,105 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Report Detail | MediSense AI{% endblock %}
+{% block nav_records %}active{% endblock %}
+
+{% block content %}
+<div class="flex-between" style="margin-bottom:24px;">
+    <div class="page-header" style="margin-bottom:0;">
+        <h2>📄 {{ report.report_name|default:"Diagnosis Report" }}</h2>
+        <p>{{ report.report_date|date:"d M Y" }}</p>
+    </div>
+    <a href="{% url 'download_report' report.id %}" class="btn-secondary">📥 Download PDF</a>
+</div>
+
+<!-- Prediction Results -->
+<div class="card">
+    <h3 class="card-title">🏆 Prediction Results</h3>
+
+    <div class="result-card rank-1" style="margin-bottom:12px;">
+        <div class="result-rank">#1</div>
+        <div class="result-info" style="flex:1;">
+            <h3>{{ prediction.predicted_disease_1|title|cut:"_" }}</h3>
+            <div class="result-bar"><div class="result-bar-fill" style="width:{{ prediction.confidence_score_1 }}%;"></div></div>
+            <p style="margin-top:4px;font-size:13px;"><strong>{{ prediction.confidence_score_1 }}%</strong> confidence</p>
+        </div>
+    </div>
+
+    {% if prediction.predicted_disease_2 %}
+    <div class="result-card rank-2" style="margin-bottom:12px;">
+        <div class="result-rank">#2</div>
+        <div class="result-info" style="flex:1;">
+            <h3>{{ prediction.predicted_disease_2|title|cut:"_" }}</h3>
+            <div class="result-bar"><div class="result-bar-fill" style="width:{{ prediction.confidence_score_2 }}%;"></div></div>
+            <p style="margin-top:4px;font-size:13px;"><strong>{{ prediction.confidence_score_2 }}%</strong> confidence</p>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if prediction.predicted_disease_3 %}
+    <div class="result-card rank-3">
+        <div class="result-rank">#3</div>
+        <div class="result-info" style="flex:1;">
+            <h3>{{ prediction.predicted_disease_3|title|cut:"_" }}</h3>
+            <div class="result-bar"><div class="result-bar-fill" style="width:{{ prediction.confidence_score_3 }}%;"></div></div>
+            <p style="margin-top:4px;font-size:13px;"><strong>{{ prediction.confidence_score_3 }}%</strong> confidence</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Prescription -->
+{% if prescriptions %}
+<div class="card">
+    <h3 class="card-title">💊 Prescription</h3>
+    {% for rx in prescriptions %}
+    <div class="prescription-box">
+        <h4>💊 Medicines for {{ prediction.predicted_disease_1|title|cut:"_" }}</h4>
+        <div class="rx-item">
+            <p><strong>Medicine(s):</strong></p>
+            <p style="margin-top:6px;line-height:1.7;">{{ rx.medicine_name }}</p>
+        </div>
+        <div class="rx-item">
+            <p><strong>Dosage:</strong></p>
+            <p style="margin-top:6px;line-height:1.7;">{{ rx.dosage }}</p>
+        </div>
+        <div class="rx-item">
+            <p><strong>Frequency / Instructions:</strong></p>
+            <p style="margin-top:6px;line-height:1.7;">{{ rx.frequency }}</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Reported Symptoms -->
+<div class="card">
+    <h3 class="card-title">✅ Reported Symptoms</h3>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        {% for sym in prediction.symptoms_selected.symptoms %}
+        <span style="background:#eff6ff;color:var(--primary);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;border:1px solid #bfdbfe;">
+            {{ sym|title|cut:"_" }}
+        </span>
+        {% empty %}
+        <p style="color:#64748b;">No symptoms recorded.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Notes -->
+{% if report.notes %}
+<div class="card">
+    <h3 class="card-title">📝 Notes</h3>
+    <p style="color:var(--text-mid);line-height:1.7;">{{ report.notes }}</p>
+</div>
+{% endif %}
+
+<div class="alert alert-warning">
+    ⚠️ This is AI-generated. Always consult a qualified doctor.
+</div>
+
+<div style="display:flex;gap:14px;">
+    <a href="{% url 'records' %}" class="btn-outline" style="flex:1;text-align:center;padding:13px;">← Back</a>
+    <a href="{% url 'download_report' report.id %}" class="btn-secondary" style="flex:1;text-align:center;padding:13px;">📥 Download PDF</a>
+    <a href="{% url 'predict' %}" class="btn-outline" style="flex:1;text-align:center;padding:13px;">🔬 New Prediction</a>
+</div>
+{% endblock %}

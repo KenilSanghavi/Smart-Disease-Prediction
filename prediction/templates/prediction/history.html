@@ -1,0 +1,56 @@
+{% extends 'accounts/base.html' %}
+{% block title %}History | MediSense AI{% endblock %}
+{% block nav_records %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>📊 Prediction History</h2>
+    <p>All your past AI predictions</p>
+</div>
+
+{% if predictions %}
+<div class="card" style="padding:0;overflow:hidden;">
+    <table style="width:100%;border-collapse:collapse;">
+        <thead>
+            <tr style="background:var(--gradient);color:white;">
+                <th style="padding:14px 18px;text-align:left;font-size:13px;">#</th>
+                <th style="padding:14px 18px;text-align:left;font-size:13px;">Primary Disease</th>
+                <th style="padding:14px 18px;text-align:left;font-size:13px;">Confidence</th>
+                <th style="padding:14px 18px;text-align:left;font-size:13px;">Date</th>
+                <th style="padding:14px 18px;text-align:left;font-size:13px;">Report</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pred in predictions %}
+            <tr style="border-bottom:1px solid var(--border);{% if forloop.even %}background:#f8fafc;{% endif %}">
+                <td style="padding:14px 18px;color:#64748b;font-size:14px;">{{ forloop.counter }}</td>
+                <td style="padding:14px 18px;font-weight:600;color:var(--primary);text-transform:capitalize;font-size:14px;">
+                    {{ pred.predicted_disease_1|cut:"_" }}
+                </td>
+                <td style="padding:14px 18px;font-size:14px;">
+                    <span style="background:#d1fae5;color:#065f46;padding:3px 10px;border-radius:12px;font-weight:700;font-size:13px;">
+                        {{ pred.confidence_score_1 }}%
+                    </span>
+                </td>
+                <td style="padding:14px 18px;color:#64748b;font-size:14px;">{{ pred.prediction_date|date:"d M Y" }}</td>
+                <td style="padding:14px 18px;">
+                    {% if pred.report %}
+                    <a href="{% url 'report_detail' pred.report.id %}" class="btn-secondary" style="font-size:12px;padding:6px 14px;">View</a>
+                    {% else %}
+                    <span style="color:#94a3b8;font-size:13px;">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card text-center" style="padding:60px;">
+    <div style="font-size:60px;margin-bottom:16px;">📭</div>
+    <h3 style="font-size:20px;font-weight:700;margin-bottom:10px;">No Predictions Yet</h3>
+    <p style="color:#64748b;margin-bottom:24px;">Start your first prediction!</p>
+    <a href="{% url 'predict' %}" class="btn-secondary">🔬 Start Prediction</a>
+</div>
+{% endif %}
+{% endblock %}

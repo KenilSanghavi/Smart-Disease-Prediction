@@ -1,0 +1,98 @@
+{% extends 'accounts/base.html' %}
+{% block title %}MediSense AI{% endblock %}
+{% block nav_dash %}active{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero Banner ── -->
+<div class="hero-banner">
+    <h1>Smart Health Dashboard</h1>
+    <p>AI-powered system to analyze symptoms and manage medical data efficiently.</p>
+    <div class="hero-icon">🧠</div>
+</div>
+
+<!-- ── Stats Cards ── -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📈</div>
+        <div class="stat-number">{{ total_predictions }}</div>
+        <div class="stat-label">Predictions</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📄</div>
+        <div class="stat-number">{{ total_records }}</div>
+        <div class="stat-label">Records</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-number">{{ accuracy }}%</div>
+        <div class="stat-label">Accuracy</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🔔</div>
+        <div class="stat-number">{{ alerts }}</div>
+        <div class="stat-label">Alerts</div>
+    </div>
+</div>
+
+<!-- ── AI Engine Banner ── -->
+<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:24px 28px;">
+    <div style="display:flex;align-items:center;gap:16px;">
+        <span style="font-size:32px;color:var(--primary);">⚕️</span>
+        <div>
+            <h3 style="font-size:17px;font-weight:700;margin-bottom:4px;">AI Disease Prediction Engine</h3>
+            <p style="font-size:13px;color:var(--text-mid);">Analyze symptoms instantly and get smart health insights using AI.</p>
+        </div>
+    </div>
+    <a href="{% url 'predict' %}" class="btn-secondary">Run Analysis</a>
+</div>
+
+<!-- ── 3 Action Cards ── -->
+<div class="dash-grid">
+    <div class="dash-card">
+        <div class="card-icon">👤</div>
+        <h3>My Profile</h3>
+        <p>Update your personal and medical details, age, medical info and contact details.</p>
+        <a href="{% url 'profile' %}" class="btn-secondary">Open Profile</a>
+    </div>
+    <div class="dash-card">
+        <div class="card-icon">📁</div>
+        <h3>Past Records</h3>
+        <p>View reports, prescriptions and history.</p>
+        <a href="{% url 'records' %}" class="btn-secondary">View Records</a>
+    </div>
+    <div class="dash-card">
+        <div class="card-icon">❤️</div>
+        <h3>Disease Prediction</h3>
+        <p>Analyze symptoms using AI.</p>
+        <a href="{% url 'predict' %}" class="btn-purple">Start Prediction</a>
+    </div>
+</div>
+
+{% if recent_prediction %}
+<!-- ── Recent Prediction ── -->
+<div class="card" style="margin-top:24px;">
+    <div class="flex-between" style="margin-bottom:16px;">
+        <h3 style="font-size:17px;font-weight:700;">📊 Latest Prediction</h3>
+        <a href="{% url 'history' %}" class="btn-outline" style="font-size:13px;padding:7px 16px;">View All</a>
+    </div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;">
+        <div>
+            <p style="font-size:12px;color:#64748b;font-weight:600;">PRIMARY DISEASE</p>
+            <p style="font-size:16px;font-weight:700;color:var(--primary);text-transform:capitalize;">
+                {{ recent_prediction.predicted_disease_1|cut:"_" }}
+            </p>
+        </div>
+        <div>
+            <p style="font-size:12px;color:#64748b;font-weight:600;">CONFIDENCE</p>
+            <p style="font-size:16px;font-weight:700;color:#10b981;">{{ recent_prediction.confidence_score_1 }}%</p>
+        </div>
+        <div>
+            <p style="font-size:12px;color:#64748b;font-weight:600;">DATE</p>
+            <p style="font-size:15px;font-weight:600;">{{ recent_prediction.prediction_date|date:"d M Y" }}</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

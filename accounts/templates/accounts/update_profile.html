@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MediSense AI</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'accounts/favicon.svg' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/style.css' %}">
+</head>
+<body style="background:#f0f4f8;min-height:100vh;">
+
+<!-- Blue Header Banner -->
+<div style="background:linear-gradient(135deg,#2563eb,#7c3aed);padding:32px 0;text-align:center;color:white;margin-bottom:40px;">
+    <h2 style="font-size:24px;font-weight:800;margin-bottom:6px;">Update Your Profile</h2>
+    <p style="opacity:0.85;font-size:14px;">Edit personal &amp; medical details</p>
+</div>
+
+<div style="max-width:600px;margin:0 auto;padding:0 20px 50px;">
+
+    {% if messages %}
+    <div class="messages-box">{% for m in messages %}<div class="alert alert-{{ m.tags }}">{{ m }}</div>{% endfor %}</div>
+    {% endif %}
+
+    <div style="background:white;border-radius:18px;padding:36px;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">{{ form.name }}</div>
+                <div class="form-group">{{ form.email }}</div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <input type="date" name="date_of_birth" class="form-input"
+                           max="{{ today }}"
+                           value="{{ request.user.date_of_birth|date:'Y-m-d' }}">
+                </div>
+                <div class="form-group">{{ form.gender }}</div>
+            </div>
+            <div class="form-group">{{ form.contact_no }}</div>
+            <div class="form-group">{{ form.medical_notes }}</div>
+            <div class="form-group">
+                <label>Profile Picture</label>{{ form.profile_pic }}
+            </div>
+
+            <div style="display:flex;gap:14px;margin-top:10px;">
+                <button type="submit" class="btn-secondary" style="flex:1;">💾 Save</button>
+                <a href="{% url 'profile' %}" class="btn-outline" style="flex:1;text-align:center;padding:13px;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

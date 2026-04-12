@@ -1,0 +1,313 @@
+{% extends 'accounts/base.html' %}
+{% block title %}AI Chatbot | MediSense AI{% endblock %}
+{% block nav_chat %}active{% endblock %}
+
+{% block content %}
+<div class="flex-between" style="margin-bottom:20px;">
+    <div class="page-header" style="margin-bottom:0;">
+        <h2>🤖 AI Health Chatbot</h2>
+        <p>Ask any health question — powered by RAG + LLM</p>
+    </div>
+    <button onclick="clearChat()" class="btn-outline" style="font-size:13px;padding:8px 16px;">
+        🗑️ Clear Chat
+    </button>
+</div>
+
+<!-- Store JSON safely -->
+<script id="pdf-data" type="application/json">
+    {{ pdf_sessions|safe }}
+</script>
+
+<!-- PDF Upload Section -->
+<div class="card" style="margin-bottom:20px;padding:20px 24px;">
+    <div class="flex-between" style="margin-bottom:12px;">
+        <h4 style="font-size:15px;font-weight:700;color:var(--primary);">
+            📎 Upload Medical Reports (PDF)
+        </h4>
+        <button onclick="clearAllPDFs()" id="clearAllBtn"
+            style="display:none;background:#fee2e2;color:#ef4444;border:none;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
+            🗑️ Clear All PDFs
+        </button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <label style="cursor:pointer;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(90deg,#2563eb,#0ea5e9);color:white;padding:10px 18px;border-radius:25px;font-size:14px;font-weight:600;">
+            <input type="file" id="pdfInput" accept=".pdf" style="display:none;" onchange="uploadPDF(this)" multiple>
+            📎 Upload PDF
+        </label>
+        <span id="pdfStatus" style="font-size:13px;color:#64748b;"></span>
+    </div>
+
+    <div id="pdfList" style="margin-top:14px;"></div>
+
+    <p id="pdfCountMsg"
+        style="font-size:12px;margin-top:10px;font-weight:600;color:#94a3b8;">
+        Upload your medical reports to ask AI questions about them.
+    </p>
+</div>
+
+<!-- Chat -->
+<div class="chat-container">
+    <div class="chat-header">
+        <h3>🤖 MediSense AI Assistant</h3>
+        <p>I can answer health questions and analyze reports.</p>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        <div class="msg-bot">
+            <div class="bot-label">🤖 MediSense AI</div>
+            Hello! How can I help you?
+        </div>
+
+        {% for chat in history %}
+        <div class="msg-user">{{ chat.message }}</div>
+        <div class="msg-bot">
+            <div class="bot-label">
+                🤖 MediSense AI
+                <span style="font-size:10px;opacity:0.6;">{{ chat.route }}</span>
+            </div>
+            {{ chat.response|linebreaksbr }}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="chat-input-area">
+        <input type="text" id="chatInput" class="chat-input"
+            placeholder="Ask a health question..."
+            onkeypress="if(event.key==='Enter'){ event.preventDefault(); sendMessage(); }">
+        <button class="btn-send" onclick="sendMessage()">Send ➤</button>
+    </div>
+</div>
+
+<style>
+.pdf-item {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 14px;
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+    margin-bottom:8px;
+}
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const chatMessages = document.getElementById('chatMessages');
+setTimeout(() => {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}, 50);
+
+// Safe JSON parse
+let pdfList = JSON.parse(document.getElementById('pdf-data').textContent || "[]");
+
+// CSRF helper
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
+}
+
+// Update PDF UI safely
+function updatePDFUI() {
+    const container = document.getElementById('pdfList');
+    container.innerHTML = '';
+
+    pdfList.forEach((pdf, i) => {
+        const div = document.createElement('div');
+        div.className = 'pdf-item';
+
+        div.innerHTML = `
+            <span>📄</span>
+            <div style="flex:1;">
+                <p class="pdf-name"></p>
+                <p style="font-size:12px;color:#94a3b8;">${pdf.pages} pages</p>
+            </div>
+            <button onclick="removePDF(${i})">✕ Remove</button>
+        `;
+
+        div.querySelector('.pdf-name').textContent = pdf.filename;
+        container.appendChild(div);
+    });
+
+    const msg = document.getElementById('pdfCountMsg');
+    const btn = document.getElementById('clearAllBtn');
+
+    if (pdfList.length > 0) {
+        msg.textContent = `✅ ${pdfList.length} PDF(s) loaded`;
+        msg.style.color = '#10b981';
+        btn.style.display = 'block';
+    } else {
+        msg.textContent = 'Upload your medical reports.';
+        msg.style.color = '#94a3b8';
+        btn.style.display = 'none';
+    }
+}
+
+// Send Message
+async function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    appendMessage('user', msg);
+    input.value = '';
+
+    const tid = appendTyping();
+
+    try {
+        const r = await fetch("{% url 'chatbot_send' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify({ message: msg })
+        });
+
+        if (!r.ok) throw new Error();
+
+        const d = await r.json();
+        removeTyping(tid);
+
+        appendMessage('bot', d.response || d.error, d.route);
+
+    } catch {
+        removeTyping(tid);
+        appendMessage('bot', '⚠️ Server error');
+    }
+}
+
+// Upload PDF
+async function uploadPDF(input) {
+    const files = input.files;
+    document.getElementById('pdfStatus').textContent =
+        `Uploading ${files.length} file(s)...`;
+
+    for (let file of files) {
+        const fd = new FormData();
+        fd.append('pdf_file', file);
+
+        try {
+            const r = await fetch("{% url 'chatbot_upload_pdf' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCSRFToken() },
+                body: fd
+            });
+
+            const d = await r.json();
+
+            if (d.success) {
+                pdfList = d.pdf_list;
+                updatePDFUI();
+                appendMessage('bot', `📄 Loaded ${d.filename}`);
+            }
+
+        } catch {
+            document.getElementById('pdfStatus').textContent = 'Upload failed';
+        }
+    }
+
+    input.value = '';
+}
+
+// Remove PDF
+async function removePDF(index) {
+    const r = await fetch("{% url 'chatbot_remove_pdf' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({ index })
+    });
+
+    const d = await r.json();
+    if (d.success) {
+        pdfList = d.pdf_list;
+        updatePDFUI();
+    }
+}
+
+// Clear PDFs
+async function clearAllPDFs() {
+    if (!confirm('Remove all PDFs?')) return;
+
+    const r = await fetch("{% url 'chatbot_clear_pdf' %}", {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCSRFToken() }
+    });
+
+    const d = await r.json();
+    if (d.success) {
+        pdfList = [];
+        updatePDFUI();
+    }
+}
+
+// Clear chat
+async function clearChat() {
+    if (!confirm('Clear chat?')) return;
+
+    await fetch("{% url 'chatbot_clear' %}", {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCSRFToken() }
+    });
+
+    chatMessages.innerHTML = `
+        <div class="msg-bot">
+            <div class="bot-label">🤖 MediSense AI</div>
+            Chat cleared!
+        </div>`;
+}
+
+// UI helpers
+function appendMessage(sender, text, route='') {
+    const div = document.createElement('div');
+
+    if (sender === 'user') {
+        div.className = 'msg-user';
+        div.textContent = text;
+    } else {
+        div.className = 'msg-bot';
+        div.innerHTML = `
+            <div class="bot-label">
+                🤖 MediSense AI
+                ${route ? `<span>${route}</span>` : ''}
+            </div>
+            ${text}
+        `;
+    }
+
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function appendTyping() {
+    const id = 't' + Date.now();
+    const div = document.createElement('div');
+
+    div.id = id;
+    div.className = 'msg-bot';
+    div.innerHTML = '<em>Thinking...</em>';
+
+    chatMessages.appendChild(div);
+    return id;
+}
+
+function removeTyping(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+}
+
+// Cookie helper
+function getCookie(name) {
+    const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return v ? v[2] : null;
+}
+
+// Init UI
+updatePDFUI();
+</script>
+{% endblock %}

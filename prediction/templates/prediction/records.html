@@ -1,0 +1,52 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Past Medical Records | MediSense AI{% endblock %}
+{% block nav_records %}active{% endblock %}
+
+{% block content %}
+<div class="flex-between" style="margin-bottom:24px;">
+    <div class="page-header" style="margin-bottom:0;">
+        <h2>Past Medical Records</h2>
+        <p>Your saved health reports and history</p>
+    </div>
+    <a href="{% url 'predict' %}" class="btn-secondary">+ Add New Report</a>
+</div>
+
+{% if reports %}
+<div class="record-grid">
+    {% for report in reports %}
+    <div class="record-card">
+        <div class="flex-between" style="margin-bottom:10px;">
+            <h3>{{ report.report_name|default:"Diagnosis Report" }}</h3>
+            <span style="font-size:12px;color:#94a3b8;">{{ report.report_date|date:"d M Y" }}</span>
+        </div>
+        <p><strong>Notes:</strong> {{ report.notes|truncatechars:80 }}</p>
+        <p style="margin-top:6px;">
+            <strong>Disease:</strong>
+            <span style="color:var(--primary);font-weight:600;text-transform:capitalize;">
+                {{ report.prediction.predicted_disease_1|cut:"_" }}
+            </span>
+        </p>
+        <p><strong>Confidence:</strong> {{ report.prediction.confidence_score_1 }}%</p>
+
+        <div style="display:flex;gap:10px;margin-top:16px;">
+            <a href="{% url 'report_detail' report.id %}" class="btn-secondary" style="flex:1;text-align:center;padding:10px;font-size:13px;">
+                View Report
+            </a>
+            <a href="{% url 'download_report' report.id %}" class="btn-outline" style="flex:1;text-align:center;padding:10px;font-size:13px;">
+                📥 PDF
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<div class="card text-center" style="padding:60px 30px;">
+    <div style="font-size:60px;margin-bottom:16px;">📭</div>
+    <h3 style="font-size:20px;font-weight:700;margin-bottom:10px;">No Records Yet</h3>
+    <p style="color:#64748b;margin-bottom:24px;">You haven't made any predictions yet.</p>
+    <a href="{% url 'predict' %}" class="btn-secondary">🔬 Start Prediction</a>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'accounts/base.html' %}
+{% block title %}MediSense AI{% endblock %}
+{% block nav_profile %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>My Profile</h2>
+    <p>Manage your personal and medical information</p>
+</div>
+
+<div class="card" style="max-width:700px;margin:0 auto;">
+    <!-- Avatar -->
+    <div class="profile-avatar-wrap">
+        {% if user.profile_pic %}
+        <img src="{{ user.profile_pic.url }}" class="profile-avatar" alt="Profile">
+        {% else %}
+        <div class="profile-avatar-placeholder">👤</div>
+        {% endif %}
+    </div>
+    <div class="profile-name">{{ user.name }}</div>
+    <div class="profile-role">{{ user.role|title }}</div>
+
+    <!-- Fields -->
+    <div class="form-row" style="margin-bottom:14px;">
+        <div>
+            <label class="form-group" style="display:block;">
+                <span style="font-size:12px;font-weight:600;color:#64748b;">FULL NAME</span>
+                <div class="form-input" style="background:#f8fafc;margin-top:6px;">{{ user.name }}</div>
+            </label>
+        </div>
+        <div>
+            <label class="form-group" style="display:block;">
+                <span style="font-size:12px;font-weight:600;color:#64748b;">EMAIL</span>
+                <div class="form-input" style="background:#f8fafc;margin-top:6px;">{{ user.email }}</div>
+            </label>
+        </div>
+    </div>
+    <div class="form-row" style="margin-bottom:14px;">
+        <div>
+            <span style="font-size:12px;font-weight:600;color:#64748b;">AGE</span>
+            <div class="form-input" style="background:#f8fafc;margin-top:6px;">{{ user.age|default:"Not set" }}</div>
+        </div>
+        <div>
+            <span style="font-size:12px;font-weight:600;color:#64748b;">GENDER</span>
+            <div class="form-input" style="background:#f8fafc;margin-top:6px;text-transform:capitalize;">{{ user.gender|default:"Not set" }}</div>
+        </div>
+    </div>
+    <div class="form-row" style="margin-bottom:14px;">
+        <div>
+            <span style="font-size:12px;font-weight:600;color:#64748b;">CONTACT</span>
+            <div class="form-input" style="background:#f8fafc;margin-top:6px;">{{ user.contact_no|default:"Not set" }}</div>
+        </div>
+        <div>
+            <span style="font-size:12px;font-weight:600;color:#64748b;">ROLE</span>
+            <div class="form-input" style="background:#f8fafc;margin-top:6px;text-transform:capitalize;">{{ user.role }}</div>
+        </div>
+    </div>
+    <div style="margin-bottom:24px;">
+        <span style="font-size:12px;font-weight:600;color:#64748b;">MEDICAL NOTES</span>
+        <div class="form-input" style="background:#f8fafc;margin-top:6px;min-height:70px;">{{ user.medical_notes|default:"No medical notes added." }}</div>
+    </div>
+
+    <div class="text-center">
+        <a href="{% url 'update_profile' %}" class="btn-secondary">✏️ Update Profile</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Prediction Result | MediSense AI{% endblock %}
+{% block nav_predict %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>🔬 Prediction Results</h2>
+    <p>AI-based disease analysis based on your symptoms</p>
+</div>
+
+<!-- ── Top 3 Predictions ── -->
+<div class="card">
+    <h3 class="card-title">🏆 Top Predicted Diseases</h3>
+
+    {% for pred in top3 %}
+    <div class="result-card rank-{{ pred.rank }}">
+        <div class="result-rank">#{{ pred.rank }}</div>
+        <div class="result-info" style="flex:1;">
+            <h3>{{ pred.disease|title|cut:"_" }}</h3>
+            <p style="font-size:13px;color:#64748b;">Confidence Score</p>
+            <div style="display:flex;justify-content:space-between;margin-top:6px;">
+                <div class="result-bar" style="flex:1;margin-right:12px;">
+                    <div class="result-bar-fill" style="width:{{ pred.probability_pct }}%;"></div>
+                </div>
+                <strong style="font-size:15px;min-width:50px;">{{ pred.probability_pct }}%</strong>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ── Prescription Section ── -->
+{% if prescription %}
+<div class="card">
+    <h3 class="card-title">💊 Auto-Generated Prescription</h3>
+    <p style="font-size:13px;color:#64748b;margin-bottom:16px;">
+        Based on your predicted disease: <strong style="color:var(--primary);text-transform:capitalize;">
+        {{ prediction.predicted_disease_1|cut:"_" }}</strong>
+    </p>
+
+    <div class="prescription-box">
+        <h4>💊 Medicines Prescribed</h4>
+        <div class="rx-item">
+            <p><strong>Medicine(s):</strong></p>
+            <p style="margin-top:6px;line-height:1.7;">{{ prescription.medicine_name }}</p>
+        </div>
+        <div class="rx-item">
+            <p><strong>Dosage:</strong></p>
+            <p style="margin-top:6px;line-height:1.7;">{{ prescription.dosage }}</p>
+        </div>
+        <div class="rx-item">
+            <p><strong>Frequency / Instructions:</strong></p>
+            <p style="margin-top:6px;line-height:1.7;">{{ prescription.frequency }}</p>
+        </div>
+        <div style="margin-top:12px;">
+            <p style="font-size:12px;color:#64748b;">
+                ⚠️ This is an AI-generated prescription. Always consult a doctor before taking any medicine.
+            </p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ── Reported Symptoms ── -->
+<div class="card">
+    <h3 class="card-title">✅ Symptoms You Reported</h3>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        {% for sym in selected_symptoms %}
+        <span style="background:#eff6ff;color:var(--primary);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;border:1px solid #bfdbfe;">
+            {{ sym|title|cut:"_" }}
+        </span>
+        {% empty %}
+        <p style="color:#64748b;">No symptoms recorded.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ── Disclaimer ── -->
+<div class="alert alert-warning">
+    ⚠️ <strong>Disclaimer:</strong> This is AI-generated. Please consult a qualified doctor for proper medical diagnosis and treatment.
+</div>
+
+<!-- ── Action Buttons ── -->
+<div style="display:flex;gap:14px;flex-wrap:wrap;">
+    {% if report %}
+    <a href="{% url 'download_report' report.id %}" class="btn-secondary" style="flex:1;text-align:center;padding:14px;">
+        📥 Download PDF Report
+    </a>
+    <a href="{% url 'report_detail' report.id %}" class="btn-outline" style="flex:1;text-align:center;padding:14px;">
+        📄 View Full Report
+    </a>
+    {% endif %}
+    <a href="{% url 'predict' %}" class="btn-outline" style="flex:1;text-align:center;padding:14px;">
+        🔄 New Prediction
+    </a>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* Animate progress bars on load */
+    window.addEventListener('load', () => {
+        document.querySelectorAll('.result-bar-fill').forEach(bar => {
+            const w = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => { bar.style.width = w; }, 200);
+        });
+    });
+</script>
+{% endblock %}

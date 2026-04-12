@@ -1,0 +1,27 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect width="64" height="64" rx="14" fill="url(#grad)"/>
+
+  <!-- Brain outline -->
+  <path d="M20 32 Q17 25 22 21 Q27 17 32 21 Q35 17 41 19 Q47 17 49 23 Q53 25 51 32 Q53 37 49 41 Q46 45 41 44 Q38 49 32 48 Q26 49 22 44 Q17 41 20 32Z"
+        fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Center dividing line -->
+  <path d="M32 21 L32 48"
+        fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- Horizontal brain fold -->
+  <path d="M20 32 Q32 29 51 32"
+        fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- ECG / pulse line -->
+  <path d="M14 37 L21 37 L24 29 L28 45 L32 37 L51 37"
+        fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
