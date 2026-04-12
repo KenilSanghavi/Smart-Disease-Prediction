@@ -1,123 +1,139 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}MediSense AI{% endblock %}</title>
-    <link rel="icon" type="image/svg+xml" href="{% static 'accounts/favicon.svg' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | Smart Disease Prediction</title>
     <link rel="stylesheet" href="{% static 'accounts/css/style.css' %}">
+    <link rel="icon" href="{% static 'accounts/favicon.svg' %}">
 </head>
-
 <body class="auth-body">
-    <div class="auth-card" style="max-width:620px;">
-        <h2>Create Account</h2>
-        <p class="subtitle">Join Smart Disease Prediction System</p>
+<div class="auth-card" style="max-width:620px;">
+    <h2>Create Account</h2>
+    <p class="subtitle">Join Smart Disease Prediction System</p>
 
-        {% if messages %}
-        <div class="messages-box">{% for m in messages %}<div class="alert alert-{{ m.tags }}">{{ m }}</div>{% endfor %}
+    {% if messages %}
+    <div class="messages-box">
+        {% for m in messages %}
+        <div class="alert alert-{{ m.tags }}">{{ m }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- Full Name + Email -->
+        <div class="form-row">
+            <div class="form-group">
+                <label>Full Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <small style="color:#ef4444;">{{ form.name.errors|join:", " }}</small>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <small style="color:#ef4444;">{{ form.email.errors|join:", " }}</small>
+                {% endif %}
+            </div>
         </div>
+
+        <!-- Password + Confirm -->
+        <div class="form-row">
+            <div class="form-group">
+                <label>Password</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                <small style="color:#ef4444;">{{ form.password.errors|join:", " }}</small>
+                {% endif %}
+
+                <!-- Strength bar -->
+                <div id="strength-box" style="display:none;margin-top:8px;">
+                    <div style="height:6px;border-radius:4px;background:#e2e8f0;overflow:hidden;">
+                        <div id="strength-bar" style="height:100%;width:0%;border-radius:4px;transition:all 0.3s;"></div>
+                    </div>
+                    <p id="strength-text" style="font-size:12px;margin-top:4px;"></p>
+                </div>
+
+                <!-- Requirements -->
+                <div style="background:#f8fafc;border-radius:8px;padding:10px;margin-top:8px;font-size:12px;color:#64748b;">
+                    <p style="font-weight:600;margin-bottom:4px;">Must contain:</p>
+                    <p id="req-length">❌ Min 8 characters</p>
+                    <p id="req-upper">❌ 1 uppercase letter</p>
+                    <p id="req-lower">❌ 1 lowercase letter</p>
+                    <p id="req-number">❌ 1 number</p>
+                    <p id="req-special">❌ 1 special character</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Confirm Password</label>
+                {{ form.confirm_password }}
+                {% if form.confirm_password.errors %}
+                <small style="color:#ef4444;">{{ form.confirm_password.errors|join:", " }}</small>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- DOB + Contact -->
+        <div class="form-row">
+            <div class="form-group">
+                <label>Date of Birth</label>
+                {{ form.date_of_birth }}
+                {% if form.date_of_birth.errors %}
+                <small style="color:#ef4444;">{{ form.date_of_birth.errors|join:", " }}</small>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label>Contact Number</label>
+                {{ form.contact_no }}
+                {% if form.contact_no.errors %}
+                <small style="color:#ef4444;">{{ form.contact_no.errors|join:", " }}</small>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-error">{{ form.non_field_errors|join:", " }}</div>
         {% endif %}
 
-        <form method="POST">
-            {% csrf_token %}
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Full Name</label>{{ form.name }}
-                    {% if form.name.errors %}<small style="color:#ef4444;">{{ form.name.errors|join:", " }}</small>{%
-                    endif %}
-                </div>
-                <div class="form-group">
-                    <label>Email</label>{{ form.email }}
-                    {% if form.email.errors %}<small style="color:#ef4444;">{{ form.email.errors|join:", " }}</small>{%
-                    endif %}
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Password</label>
-                    {{ form.password }}
-                    {% if form.password.errors %}<small style="color:#ef4444;">{{ form.password.errors|join:", "
-                        }}</small>{% endif %}
-                    <!-- Strength bar -->
-                    <div id="strength-box" style="display:none;margin-top:8px;">
-                        <div style="height:6px;border-radius:4px;background:#e2e8f0;overflow:hidden;">
-                            <div id="strength-bar" style="height:100%;width:0%;border-radius:4px;transition:all 0.3s;">
-                            </div>
-                        </div>
-                        <p id="strength-text" style="font-size:12px;margin-top:4px;"></p>
-                    </div>
-                    <div
-                        style="background:#f8fafc;border-radius:8px;padding:10px;margin-top:8px;font-size:12px;color:#64748b;">
-                        <p style="font-weight:600;margin-bottom:4px;">Must contain:</p>
-                        <p id="req-length">❌ Min 8 characters</p>
-                        <p id="req-upper">❌ 1 uppercase letter</p>
-                        <p id="req-lower">❌ 1 lowercase letter</p>
-                        <p id="req-number">❌ 1 number</p>
-                        <p id="req-special">❌ 1 special character</p>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Confirm Password</label>{{ form.confirm_password }}
-                    {% if form.confirm_password.errors %}<small style="color:#ef4444;">{{
-                        form.confirm_password.errors|join:", " }}</small>{% endif %}
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Date of Birth</label>{{ form.date_of_birth }}
-                </div>
-                <div class="form-group">
-                    <label>Contact Number</label>{{ form.contact_no }}
-                    {% if form.contact_no.errors %}<small style="color:#ef4444;">{{ form.contact_no.errors|join:", "
-                        }}</small>{% endif %}
-                </div>
-            </div>
-            {% if form.non_field_errors %}
-            <div class="alert alert-error">{{ form.non_field_errors|join:", " }}</div>
-            {% endif %} 
-            <button type="submit" class="btn-primary">Register</button>
-            <div class="auth-link">Already have an account? <a href="{% url 'login' %}"><strong>Login</strong></a></div>
-        </form>
-    </div>
+        <button type="submit" class="btn-primary">Register</button>
+        <div class="auth-link">
+            Already have an account? <a href="{% url 'login' %}"><strong>Login</strong></a>
+        </div>
+    </form>
+</div>
 
-    <script>
-        const pwInput = document.getElementById('id_password');
-        if (pwInput) {
-            pwInput.addEventListener('input', function () {
-                const v = this.value;
-                document.getElementById('strength-box').style.display = v ? 'block' : 'none';
-                const checks = {
-                    length: v.length >= 8,
-                    upper: /[A-Z]/.test(v),
-                    lower: /[a-z]/.test(v),
-                    number: /[0-9]/.test(v),
-                    special: /[!@#$%^&*(),.?":{}|<>]/.test(v),
-                };
-                document.getElementById('req-length').textContent = (checks.length ? '✅' : '❌') + ' Min 8 characters';
-                document.getElementById('req-upper').textContent = (checks.upper ? '✅' : '❌') + ' 1 uppercase letter';
-                document.getElementById('req-lower').textContent = (checks.lower ? '✅' : '❌') + ' 1 lowercase letter';
-                document.getElementById('req-number').textContent = (checks.number ? '✅' : '❌') + ' 1 number';
-                document.getElementById('req-special').textContent = (checks.special ? '✅' : '❌') + ' 1 special character';
-                const score = Object.values(checks).filter(Boolean).length;
-                const bar = document.getElementById('strength-bar');
-                const txt = document.getElementById('strength-text');
-                if (score <= 2) {
-                    bar.style.width = '33%'; bar.style.background = '#ef4444';
-                    text.textContent = '🔴 Weak password'; text.style.color = '#ef4444';
-                } else if (score <= 3) {
-                    bar.style.width = '66%'; bar.style.background = '#f59e0b';
-                    text.textContent = '🟡 Medium password'; text.style.color = '#f59e0b';
-                } else if (score === 4) {
-                    bar.style.width = '85%'; bar.style.background = '#3b82f6';
-                    text.textContent = '🔵 Strong password'; text.style.color = '#3b82f6';
-                } else {
-                    bar.style.width = '100%'; bar.style.background = '#10b981';
-                    text.textContent = '🟢 Very Strong!'; text.style.color = '#10b981';
-                }
-            });
-        }
-    </script>
+<script>
+const pwInput = document.getElementById('id_password');
+if (pwInput) {
+    pwInput.addEventListener('input', function() {
+        const v = this.value;
+        document.getElementById('strength-box').style.display = v ? 'block' : 'none';
+        const checks = {
+            length:  v.length >= 8,
+            upper:   /[A-Z]/.test(v),
+            lower:   /[a-z]/.test(v),
+            number:  /[0-9]/.test(v),
+            special: /[!@#$%^&*(),.?":{}|<>]/.test(v),
+        };
+        document.getElementById('req-length').textContent  = (checks.length  ? '✅' : '❌') + ' Min 8 characters';
+        document.getElementById('req-upper').textContent   = (checks.upper   ? '✅' : '❌') + ' 1 uppercase letter';
+        document.getElementById('req-lower').textContent   = (checks.lower   ? '✅' : '❌') + ' 1 lowercase letter';
+        document.getElementById('req-number').textContent  = (checks.number  ? '✅' : '❌') + ' 1 number';
+        document.getElementById('req-special').textContent = (checks.special ? '✅' : '❌') + ' 1 special character';
+        const score = Object.values(checks).filter(Boolean).length;
+        const bar   = document.getElementById('strength-bar');
+        const txt   = document.getElementById('strength-text');
+        const levels = [[0,'',''], [33,'#ef4444','🔴 Weak'], [55,'#f59e0b','🟡 Medium'], [80,'#3b82f6','🔵 Strong'], [100,'#10b981','🟢 Very Strong!']];
+        const [w,c,t] = levels[score] || levels[0];
+        bar.style.width = w+'%'; bar.style.background = c;
+        txt.textContent = t; txt.style.color = c;
+    });
+}
+</script>
 </body>
-
 </html>
