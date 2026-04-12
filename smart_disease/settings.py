@@ -5,6 +5,7 @@
   New: Chatbot app, Medicine Prescription, PDF Download
 ================================================================
 """
+import os
 from pathlib import Path
 from django.contrib.messages import constants as messages
 
@@ -31,6 +32,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -60,14 +62,15 @@ TEMPLATES = [
 WSGI_APPLICATION = 'smart_disease.wsgi.application'
 
 # ── DATABASE — MySQL ─────────────────────────────────────────
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'smart_disease',
-        'USER': 'root',
-        'PASSWORD': 'Bright!1261',           # ← Your MySQL password
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'ENGINE':   'django.db.backends.mysql',
+        'NAME':     os.environ.get('MYSQL_DATABASE', 'smart_disease'),
+        'USER':     os.environ.get('MYSQL_USER', 'root'),
+        'PASSWORD': os.environ.get('MYSQL_PASSWORD', 'Bright!1261'),
+        'HOST':     os.environ.get('MYSQL_HOST', 'localhost'),
+        'PORT':     os.environ.get('MYSQL_PORT', '3306'),
     }
 }
 
@@ -86,8 +89,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # ── STATIC FILES ─────────────────────────────────────────────
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = []
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ── MEDIA FILES ──────────────────────────────────────────────
 MEDIA_URL = '/media/'
