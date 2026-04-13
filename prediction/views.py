@@ -26,19 +26,18 @@ from .models import (
 # ── LOAD ML MODELS ON SERVER START ───────────────────────────
 BASE_ML = os.path.join(os.path.dirname(__file__), 'ml_models')
 ML_LOADED = False
-
 try:
-    with open(os.path.join(BASE_ML, 'disease_model.pkl'), 'rb') as f:
-        _data     = pickle.load(f)
-        ML_MODEL  = _data['model']
-    with open(os.path.join(BASE_ML, 'scaler.pkl'), 'rb') as f:
-        ML_SCALER = pickle.load(f)
-    with open(os.path.join(BASE_ML, 'label_encoder.pkl'), 'rb') as f:
-        ML_LE     = pickle.load(f)
-    ML_LOADED = True
-    print("[ML] Disease prediction model loaded successfully!")
+    if not os.environ.get('SKIP_ML'):
+        with open(os.path.join(BASE_ML, 'disease_model.pkl'), 'rb') as f:
+            _data    = pickle.load(f)
+            ML_MODEL = _data['model']
+        with open(os.path.join(BASE_ML, 'scaler.pkl'), 'rb') as f:
+            ML_SCALER = pickle.load(f)
+        with open(os.path.join(BASE_ML, 'label_encoder.pkl'), 'rb') as f:
+            ML_LE     = pickle.load(f)
+        ML_LOADED = True
 except Exception as e:
-    print(f"[ML] Model not loaded: {e}. Run disease_prediction_model.py first.")
+    print(f"[ML] Model not loaded: {e}")
 
 
 def _run_ml_prediction(feature_values, dob, gender):

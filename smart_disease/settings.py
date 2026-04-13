@@ -13,12 +13,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-smart-disease-v2-change-in-production-xyz123'
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = [
-    'web-production-78f04.up.railway.app',
-    '*'
-]
+ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = [
     'https://web-production-78f04.up.railway.app',
 ]
@@ -114,9 +111,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'kenilsanghavi2017@gamil.com'           # ← Your Gmail
+EMAIL_HOST_USER = 'kenilsanghavi2017@gmail.com'           # ← Your Gmail
 EMAIL_HOST_PASSWORD = 'ifcj yiim qeni mfmx'       # ← Your App Password
-DEFAULT_FROM_EMAIL = 'Smart Disease Prediction <your-email@gmail.com>'        # ← Your Gmail
+DEFAULT_FROM_EMAIL = 'Smart Disease Prediction <kenilsanghavi2017@gmail.com>'        # ← Your Gmail
 
 # ── OTP SETTINGS ─────────────────────────────────────────────
 OTP_EXPIRY_MINUTES = 5
