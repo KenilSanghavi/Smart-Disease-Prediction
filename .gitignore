@@ -6,9 +6,6 @@ db.sqlite3
 staticfiles/
 media/
 *.log
-
-# Large ML files
-*.csv
+*.pkl
 chatbot/chroma_db/
 chatbot/docs/
-prediction/ml_models/
