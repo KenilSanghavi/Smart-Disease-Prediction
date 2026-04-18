@@ -63,7 +63,7 @@ SCALER_PATH        = os.path.join(BASE_DIR, "scaler.pkl")
 
 RANDOM_STATE             = 42
 TEST_SIZE                = 0.20
-TARGET_SAMPLES_PER_CLASS = 350
+TARGET_SAMPLES_PER_CLASS = 150
 
 FEATURE_COLS = [
     "age", "gender", "bmi", "body_temperature", "heart_rate",
@@ -175,45 +175,18 @@ def _encode_and_split(df):
 # SECTION 3 — MODEL BUILDING
 
 def _build_ensemble():
-    print("[4/5] Building ensemble (RF + GradientBoosting + MLP)...")
+    """Build lightweight model for cloud deployment."""
+    print("[4/5] Building lightweight Random Forest model...")
 
     rf = RandomForestClassifier(
-        n_estimators=300,
+        n_estimators=100,
+        max_depth=15,
         max_features="sqrt",
         class_weight="balanced",
         random_state=RANDOM_STATE,
         n_jobs=-1,
     )
-
-    gb = GradientBoostingClassifier(
-        n_estimators=200,
-        learning_rate=0.08,
-        max_depth=5,
-        subsample=0.85,
-        random_state=RANDOM_STATE,
-    )
-
-    mlp = MLPClassifier(
-        hidden_layer_sizes=(256, 128, 64),
-        activation="relu",
-        solver="adam",
-        alpha=0.001,
-        learning_rate="adaptive",
-        max_iter=500,
-        early_stopping=True,
-        validation_fraction=0.1,
-        random_state=RANDOM_STATE,
-    )
-
-    # Soft voting — each model votes with its probability output
-    # RF and GB get weight 2, MLP gets weight 1
-    ensemble = VotingClassifier(
-        estimators=[("rf", rf), ("gb", gb), ("mlp", mlp)],
-        voting="soft",
-        weights=[2, 2, 1],
-    )
-    return ensemble
-
+    return rf
 
 def _train_and_evaluate(ensemble, X_train, X_test, y_train, y_test, le):
     print("[5/5] Training + calibrating probabilities...")

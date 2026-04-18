@@ -6,6 +6,5 @@ db.sqlite3
 staticfiles/
 media/
 *.log
-*.pkl
 chatbot/chroma_db/
 chatbot/docs/
