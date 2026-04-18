@@ -6,14 +6,14 @@
 import os
 from pathlib import Path
 from django.contrib.messages import constants as messages
-
+import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-local-dev-key-change-in-production')
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,smart-disease-prediction-otlm.onrender.com').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,*').split(',')
 
 CSRF_TRUSTED_ORIGINS = [
     f"https://{host}" for host in ALLOWED_HOSTS if host not in ['localhost', '127.0.0.1']
@@ -64,22 +64,23 @@ TEMPLATES = [
 WSGI_APPLICATION = 'smart_disease.wsgi.application'
 
 # ── DATABASE ─────────────────────────────────────────────────
+# ── DATABASE ─────────────────────────────────────────────────
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
-    # PostgreSQL on Render
-    import dj_database_url
+    
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
-            ssl_require=True,
         )
     }
 else:
-    # Local MySQL for development
-    import pymysql
-    pymysql.install_as_MySQLdb()
+    try:
+        import pymysql
+        pymysql.install_as_MySQLdb()
+    except ImportError:
+        pass
     DATABASES = {
         'default': {
             'ENGINE':   'django.db.backends.mysql',
@@ -90,7 +91,6 @@ else:
             'PORT':     '3306',
         }
     }
-
 # ── CUSTOM USER MODEL ────────────────────────────────────────
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
