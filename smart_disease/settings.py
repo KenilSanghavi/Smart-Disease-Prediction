@@ -66,8 +66,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'smart_disease.wsgi.application'
+# Reduce memory usage
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
 
-# ── DATABASE ─────────────────────────────────────────────────
+
 # ── DATABASE ─────────────────────────────────────────────────
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
