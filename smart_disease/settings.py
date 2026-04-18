@@ -1,8 +1,6 @@
 """
 ================================================================
-  settings.py — Django Project Configuration
-  Project: Smart Disease Prediction System v2
-  New: Chatbot app, Medicine Prescription, PDF Download
+  settings.py — Django Settings for Render Deployment
 ================================================================
 """
 import os
@@ -11,14 +9,16 @@ from django.contrib.messages import constants as messages
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-smart-disease-v2-change-in-production-xyz123'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-local-dev-key-change-in-production')
 
-DEBUG = False
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
 CSRF_TRUSTED_ORIGINS = [
-    'https://web-production-78f04.up.railway.app',
+    f"https://{host}" for host in ALLOWED_HOSTS if host not in ['localhost', '127.0.0.1']
 ]
+
 # ── INSTALLED APPS ──────────────────────────────────────────
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -27,9 +27,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',     # Login, Signup, OTP, Profile
-    'prediction',   # ML Prediction, Records, Prescriptions, PDF
-    'chatbot',      # AI Chatbot integration
+    'accounts',
+    'prediction',
+    'chatbot',
 ]
 
 MIDDLEWARE = [
@@ -63,26 +63,41 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'smart_disease.wsgi.application'
 
-# ── DATABASE — MySQL ─────────────────────────────────────────
+# ── DATABASE ─────────────────────────────────────────────────
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
-DATABASES = {
-    'default': {
-        'ENGINE':   'django.db.backends.mysql',
-        'NAME':     os.environ.get('MYSQL_DATABASE', 'smart_disease'),
-        'USER':     os.environ.get('MYSQL_USER', 'root'),
-        'PASSWORD': os.environ.get('MYSQL_PASSWORD', 'Bright!1261'),
-        'HOST':     os.environ.get('MYSQL_HOST', 'localhost'),
-        'PORT':     os.environ.get('MYSQL_PORT', '3306'),
+if DATABASE_URL:
+    # PostgreSQL on Render
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
-}
+else:
+    # Local MySQL for development
+    import pymysql
+    pymysql.install_as_MySQLdb()
+    DATABASES = {
+        'default': {
+            'ENGINE':   'django.db.backends.mysql',
+            'NAME':     'smart_disease',
+            'USER':     'root',
+            'PASSWORD': 'Bright!1261',
+            'HOST':     'localhost',
+            'PORT':     '3306',
+        }
+    }
 
 # ── CUSTOM USER MODEL ────────────────────────────────────────
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # ── AUTH REDIRECTS ───────────────────────────────────────────
-LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/prediction/dashboard/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
+LOGIN_URL            = '/accounts/login/'
+LOGIN_REDIRECT_URL   = '/prediction/dashboard/'
+LOGOUT_REDIRECT_URL  = '/accounts/login/'
 
 # ── PASSWORD VALIDATION ──────────────────────────────────────
 AUTH_PASSWORD_VALIDATORS = [
@@ -90,36 +105,35 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # ── STATIC FILES ─────────────────────────────────────────────
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = []
+STATIC_URL   = '/static/'
+STATIC_ROOT  = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ── MEDIA FILES ──────────────────────────────────────────────
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL  = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'Asia/Kolkata'
-USE_I18N = False
-USE_TZ = True
+TIME_ZONE     = 'Asia/Kolkata'
+USE_I18N      = True
+USE_TZ        = True
 
 # ── EMAIL CONFIG ─────────────────────────────────────────────
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'kenilsanghavi2017@gmail.com'           # ← Your Gmail
-EMAIL_HOST_PASSWORD = 'ifcj yiim qeni mfmx'       # ← Your App Password
-DEFAULT_FROM_EMAIL = 'Smart Disease Prediction <kenilsanghavi2017@gmail.com>'        # ← Your Gmail
+EMAIL_BACKEND       = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST          = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT          = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS       = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER     = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL  = os.environ.get('DEFAULT_FROM_EMAIL', '')
 
-# ── OTP SETTINGS ─────────────────────────────────────────────
+# ── OTP ──────────────────────────────────────────────────────
 OTP_EXPIRY_MINUTES = 5
 
-# ── CHATBOT API — FastAPI runs on port 8001 ──────────────────
-CHATBOT_API_URL = 'http://127.0.0.1:8001'
+# ── CHATBOT ──────────────────────────────────────────────────
+CHATBOT_API_URL = os.environ.get('CHATBOT_API_URL', 'http://127.0.0.1:8001')
 
 # ── MESSAGE TAGS ─────────────────────────────────────────────
 MESSAGE_TAGS = {
