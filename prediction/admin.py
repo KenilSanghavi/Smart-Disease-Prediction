@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import Symptom, Disease, DiseaseMedicine, UserSymptom, Prediction, DiagnosisReport, Medicine, Prescription
+from .models import Symptom, Disease, DiseaseSymptom, DiseaseMedicine, UserSymptom, Prediction, DiagnosisReport, Medicine, Prescription
 
 @admin.register(Symptom)
 class SymptomAdmin(admin.ModelAdmin):
-    list_display = ('symptom_name', 'display_name', 'category')
+    list_display = ('symptom_name', 'category')
     list_filter  = ('category',)
 
 @admin.register(Disease)
@@ -18,8 +18,8 @@ class DiseaseMedicineAdmin(admin.ModelAdmin):
 
 @admin.register(Prediction)
 class PredictionAdmin(admin.ModelAdmin):
-    list_display  = ('user', 'predicted_disease_1', 'confidence_score_1', 'prediction_date')
-    list_filter   = ('prediction_date',)
+    list_display  = ('user', 'predicted_disease_1', 'confidence_score_1', 'created_at')
+    list_filter   = ('created_at',)
 
 @admin.register(DiagnosisReport)
 class DiagnosisReportAdmin(admin.ModelAdmin):

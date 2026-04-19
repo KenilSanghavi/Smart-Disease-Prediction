@@ -19,7 +19,6 @@
     - No form handling
 
   HOW YOUR DJANGO FRIEND USES THIS:
-    import joblib
     from disease_prediction_model import predict_top3
     result = predict_top3(model, scaler, le, data, dob, gender)
 
@@ -32,7 +31,7 @@
 """
 
 import os
-import joblib # THE FIX: Replaced pickle for maximum compression
+import pickle
 import warnings
 import numpy as np
 import pandas as pd
@@ -40,7 +39,7 @@ from datetime import date
 
 from sklearn.ensemble import (
     RandomForestClassifier,
-    HistGradientBoostingClassifier, # THE FIX: Replaced standard GradientBoosting
+    GradientBoostingClassifier,
     VotingClassifier,
 )
 from sklearn.neural_network import MLPClassifier
@@ -88,7 +87,7 @@ def load_and_preprocess(path):
             "  Make sure the CSV is in the same folder as this script.\n"
         )
     df = pd.read_csv(path)
-    print(f"      Shape      : {df.shape}")
+    print(f"      Shape     : {df.shape}")
     print(f"      Diseases  : {df[TARGET_COL].nunique()}")
     print(f"      Missing   : {df.isnull().sum().sum()} values")
     df = _engineer_features(df)
@@ -176,35 +175,31 @@ def _encode_and_split(df):
 # SECTION 3 — MODEL BUILDING
 
 def _build_ensemble():
-    print("[4/5] Building ensemble (RF + HistGB + MLP)...")
-    """Build lightweight model for cloud deployment."""
-    
-    # THE FIX: Added max_depth to stop infinite tree growth, reduced estimators
+    print("[4/5] Building ensemble (RF + GradientBoosting + MLP)...")
+
     rf = RandomForestClassifier(
-        n_estimators=100,
-        max_depth=20,
+        n_estimators=300,
         max_features="sqrt",
         class_weight="balanced",
         random_state=RANDOM_STATE,
         n_jobs=-1,
     )
 
-    # THE FIX: Switched to HistGradientBoosting for tiny file size
-    gb = HistGradientBoostingClassifier(
-        max_iter=100,
-        learning_rate=0.1,
+    gb = GradientBoostingClassifier(
+        n_estimators=200,
+        learning_rate=0.08,
         max_depth=5,
+        subsample=0.85,
         random_state=RANDOM_STATE,
     )
 
-    # THE FIX: Slightly trimmed the hidden layers
     mlp = MLPClassifier(
-        hidden_layer_sizes=(128, 64),
+        hidden_layer_sizes=(256, 128, 64),
         activation="relu",
         solver="adam",
         alpha=0.001,
         learning_rate="adaptive",
-        max_iter=300,
+        max_iter=500,
         early_stopping=True,
         validation_fraction=0.1,
         random_state=RANDOM_STATE,
@@ -221,28 +216,37 @@ def _build_ensemble():
 
 
 def _train_and_evaluate(ensemble, X_train, X_test, y_train, y_test, le):
-    """Train without heavy calibration to save memory."""
-    from sklearn.calibration import CalibratedClassifierCV
+    print("[5/5] Training + calibrating probabilities...")
+    print("      (this takes 1-2 minutes — please wait)")
 
-    print("[5/5] Training model...")
     ensemble.fit(X_train, y_train)
 
-    # THE FIX: Reduced cv from 5 to 2 to prevent extreme memory duplication
-    calibrated = CalibratedClassifierCV(
-        ensemble,
-        method='sigmoid',
-        cv=2              
-    )
+    # Platt scaling — makes probability outputs more reliable
+    calibrated = CalibratedClassifierCV(ensemble, method="sigmoid", cv=5)
     calibrated.fit(X_train, y_train)
 
+    # Evaluation
     y_pred = calibrated.predict(X_test)
     acc    = accuracy_score(y_test, y_pred)
-    print(f"\n      Test Accuracy : {acc * 100:.2f}%")
 
-    from sklearn.metrics import classification_report
-    print(classification_report(y_test, y_pred, target_names=le.classes_))
+    print(f"\n      Test Accuracy : {acc * 100:.2f}%")
+    print("\n      Per-class breakdown:")
+    print(classification_report(
+        y_test, y_pred,
+        target_names=le.classes_,
+        digits=3
+    ))
+
+    # Quick cross-val check on RF alone
+    cv = cross_val_score(
+        RandomForestClassifier(n_estimators=100, random_state=RANDOM_STATE, n_jobs=-1),
+        X_train, y_train, cv=5, scoring="accuracy"
+    )
+    print(f"      5-Fold CV (RF baseline): {cv.mean()*100:.2f}% +/- {cv.std()*100:.2f}%")
 
     return calibrated
+
+
 
 # SECTION 4 — PREDICTION FUNCTION
 
@@ -309,9 +313,9 @@ def predict_top3(model, scaler, le,
 
     return {
         "patient_info": {
-            "age"      : age,
-            "gender"   : "Male" if gender == 1 else "Female",
-            "disabled" : disabled,
+            "age"     : age,
+            "gender"  : "Male" if gender == 1 else "Female",
+            "disabled": disabled,
         },
         "top3_predictions": [
             {
@@ -345,11 +349,15 @@ if __name__ == "__main__":
     ensemble = _build_ensemble()
     calibrated_model = _train_and_evaluate(ensemble, X_train, X_test, y_train, y_test, le)
 
-    # THE FIX: Save the 3 pkl files using joblib with compress=9
-    print("\n[6/6] Saving compressed models...")
-    joblib.dump({"model": calibrated_model, "feature_cols": feat_cols}, MODEL_SAVE_PATH, compress=9)
-    joblib.dump(le, LABEL_ENCODER_PATH, compress=9)
-    joblib.dump(scaler, SCALER_PATH, compress=9)
+    # Save the 3 pkl files Django will need
+    with open(MODEL_SAVE_PATH, "wb") as f:
+        pickle.dump({"model": calibrated_model, "feature_cols": feat_cols}, f)
+
+    with open(LABEL_ENCODER_PATH, "wb") as f:
+        pickle.dump(le, f)
+
+    with open(SCALER_PATH, "wb") as f:
+        pickle.dump(scaler, f)
 
     # Quick demo to verify everything works
     print("\n  VERIFICATION — sample prediction:")
@@ -382,3 +390,5 @@ if __name__ == "__main__":
     print()
     for p in result["top3_predictions"]:
         print(f"  #{p['rank']} {p['disease']:<20} {p['probability_pct']:>6.2f}% ")
+
+    

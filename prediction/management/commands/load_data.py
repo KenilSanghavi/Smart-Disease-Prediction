@@ -85,7 +85,7 @@ class Command(BaseCommand):
         for name, display, precaution in diseases:
             _, created = Disease.objects.get_or_create(
                 disease_name=name,
-                defaults={'description': display, 'precautions': precaution}
+                # defaults={'description': display, 'precautions': precaution}
             )
             if created:
                 count += 1

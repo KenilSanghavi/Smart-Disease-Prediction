@@ -29,7 +29,7 @@
                 <label class="symptom-item" onclick="toggleSymptom(this)">
                     <input type="checkbox" name="symptoms" value="{{ symptom.symptom_name }}">
                     <span class="checkmark">✓</span>
-                    <span>{{ symptom.display_name|default:symptom.symptom_name }}</span>
+                    <span>{{ symptom.symptom_name }}</span>
                 </label>
                 {% endfor %}
             </div>
@@ -45,7 +45,7 @@
                 <label class="symptom-item" onclick="toggleSymptom(this)">
                     <input type="checkbox" name="symptoms" value="{{ symptom.symptom_name }}">
                     <span class="checkmark">✓</span>
-                    <span>{{ symptom.display_name|default:symptom.symptom_name }}</span>
+                    <span>{{ symptom.symptom_name }}</span>
                 </label>
                 {% endfor %}
             </div>
@@ -61,7 +61,7 @@
                 <label class="symptom-item" onclick="toggleSymptom(this)">
                     <input type="checkbox" name="symptoms" value="{{ symptom.symptom_name }}">
                     <span class="checkmark">✓</span>
-                    <span>{{ symptom.display_name|default:symptom.symptom_name }}</span>
+                    <span>{{ symptom.symptom_name }}</span>
                 </label>
                 {% endfor %}
             </div>
@@ -77,7 +77,7 @@
                 <label class="symptom-item" onclick="toggleSymptom(this)">
                     <input type="checkbox" name="symptoms" value="{{ symptom.symptom_name }}">
                     <span class="checkmark">✓</span>
-                    <span>{{ symptom.display_name|default:symptom.symptom_name }}</span>
+                    <span>{{ symptom.symptom_name }}</span>
                 </label>
                 {% endfor %}
             </div>
