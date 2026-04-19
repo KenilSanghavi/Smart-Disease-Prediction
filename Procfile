@@ -1,1 +1,1 @@
-web: gunicorn smart_disease.wsgi:application --bind 0.0.0.0:10000 --workers 1 --timeout 120
+web: python manage.py migrate && python manage.py load_data && gunicorn smart_disease.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 120

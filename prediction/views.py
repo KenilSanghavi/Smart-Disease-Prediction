@@ -9,7 +9,6 @@
 ================================================================
 """
 import os
-import pickle
 import numpy as np
 from datetime import date as date_obj
 from django.shortcuts import render, redirect, get_object_or_404
@@ -26,17 +25,16 @@ from .models import (
 # ── LOAD ML MODELS ON SERVER START ───────────────────────────
 BASE_ML = os.path.join(os.path.dirname(__file__), 'ml_models')
 ML_LOADED = False
+import joblib
 try:
-    if not os.environ.get('SKIP_ML'):
-        with open(os.path.join(BASE_ML, 'disease_model.pkl'), 'rb') as f:
-            _data    = pickle.load(f)
-            ML_MODEL = _data['model']
-        with open(os.path.join(BASE_ML, 'scaler.pkl'), 'rb') as f:
-            ML_SCALER = pickle.load(f)
-        with open(os.path.join(BASE_ML, 'label_encoder.pkl'), 'rb') as f:
-            ML_LE     = pickle.load(f)
-        ML_LOADED = True
+    _data     = joblib.load(os.path.join(BASE_ML, 'disease_model.pkl'))
+    ML_MODEL  = _data['model']
+    ML_SCALER = joblib.load(os.path.join(BASE_ML, 'scaler.pkl'))
+    ML_LE     = joblib.load(os.path.join(BASE_ML, 'label_encoder.pkl'))
+    ML_LOADED = True
+    print("[ML] Disease prediction model loaded successfully!")
 except Exception as e:
+    ML_LOADED = False
     print(f"[ML] Model not loaded: {e}")
 
 

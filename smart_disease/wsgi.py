@@ -1,8 +1,5 @@
 import os
 
-from django.core.wsgi import get_wsgi_application
-
-# Only use pymysql locally
 if not os.environ.get('DATABASE_URL'):
     try:
         import pymysql
@@ -10,6 +7,6 @@ if not os.environ.get('DATABASE_URL'):
     except ImportError:
         pass
 
+from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'smart_disease.settings')
-
 application = get_wsgi_application()

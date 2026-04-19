@@ -6,12 +6,13 @@
 import os
 from pathlib import Path
 from django.contrib.messages import constants as messages
-import dj_database_url
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-local-dev-key-change-in-production')
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+
 ALLOWED_HOSTS = [
     'smart-disease-prediction-otlm.onrender.com',
     'localhost',
@@ -21,6 +22,10 @@ ALLOWED_HOSTS = [
 
 CSRF_TRUSTED_ORIGINS = [
     'https://smart-disease-prediction-otlm.onrender.com',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{host}" for host in ALLOWED_HOSTS if host not in ['localhost', '127.0.0.1']
 ]
 
 # ── INSTALLED APPS ──────────────────────────────────────────
@@ -66,28 +71,24 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'smart_disease.wsgi.application'
-# Reduce memory usage
-DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
-
 
 # ── DATABASE ─────────────────────────────────────────────────
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
-    
+    # PostgreSQL on Render
+    import dj_database_url
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
+            ssl_require=True,
         )
     }
 else:
-    try:
-        import pymysql
-        pymysql.install_as_MySQLdb()
-    except ImportError:
-        pass
+    # Local MySQL for development
+    import pymysql
+    pymysql.install_as_MySQLdb()
     DATABASES = {
         'default': {
             'ENGINE':   'django.db.backends.mysql',
@@ -98,6 +99,7 @@ else:
             'PORT':     '3306',
         }
     }
+
 # ── CUSTOM USER MODEL ────────────────────────────────────────
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
@@ -134,7 +136,7 @@ EMAIL_PORT          = int(os.environ.get('EMAIL_PORT', 587))
 EMAIL_USE_TLS       = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER     = os.environ.get('EMAIL_HOST_USER', 'kenilsanghavi2017@gmail.com')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ifcj yiim qeni mfmx')
-DEFAULT_FROM_EMAIL  = os.environ.get('DEFAULT_FROM_EMAIL', 'Smart Disease Prediction <your-email@gmail.com>')
+DEFAULT_FROM_EMAIL  = os.environ.get('DEFAULT_FROM_EMAIL', 'kenilsanghavi2017@gmail.com')
 
 # ── OTP ──────────────────────────────────────────────────────
 OTP_EXPIRY_MINUTES = 5
