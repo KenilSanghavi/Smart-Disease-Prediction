@@ -13,10 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse
 
-from .models import (
-    Symptom, Disease, Prediction, DiagnosisReport,
-    Medicine, Prescription, UserSymptom, DiseaseMedicine
-)
+from .models import Symptom, Disease, DiseaseMedicine, UserSymptom, Prediction, DiagnosisReport, Medicine, Prescription
 
 
 # ── LOAD ML MODELS ON SERVER START ───────────────────────────
