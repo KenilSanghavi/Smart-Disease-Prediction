@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Symptom, Disease, DiseaseSymptom, DiseaseMedicine, UserSymptom, Prediction, DiagnosisReport, Medicine, Prescription
+from .models import Symptom, Disease, DiseaseMedicine, UserSymptom, Prediction, DiagnosisReport, Medicine, Prescription
 
 @admin.register(Symptom)
 class SymptomAdmin(admin.ModelAdmin):
