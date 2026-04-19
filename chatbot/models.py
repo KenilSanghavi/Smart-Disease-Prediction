@@ -4,8 +4,8 @@
   Table: CHATBOT_HISTORY (NEW)
 ================================================================
 """
-from django.db import models
 from accounts.models import CustomUser
+from django.db import models
 
 
 class ChatbotHistory(models.Model):
@@ -14,7 +14,7 @@ class ChatbotHistory(models.Model):
     Stores every chatbot conversation for each user.
     Allows users to view their chat history.
     """
-    user       = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='chat_history')
+    user = models.ForeignKey('accounts.CustomUser', on_delete=models.CASCADE, related_name='chat_history')
     message    = models.TextField(help_text="User's message to chatbot")
     response   = models.TextField(help_text="Chatbot's response")
     route      = models.CharField(max_length=20, blank=True, help_text="rag/llm/web/fallback")
